@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "at.vigpass.vigpass",
+      "sha256_cert_fingerprints": [
+        "C0:D6:8D:37:D1:C3:91:F3:4C:8F:71:9C:B7:41:A6:D6:9D:89:CC:EB:A8:AD:27:D9:14:29:9B:59:9C:42:85:47"
+      ]
+    }
+  }
+]

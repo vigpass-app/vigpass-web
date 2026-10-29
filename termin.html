@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VigPass Werkstatt-Termin</title>
+<meta name="description" content="Werkstätten erstellen hier kostenlos einen QR-Code oder Link für den nächsten Termin ihrer Kunden – der Termin landet mit Erinnerung in der App VigPass.">
+<!-- Copyright © 2026 Kreshnik Berisha · VigPass. Alle Rechte vorbehalten.
+     Datenschutz: Die Termindaten stehen nur im Link nach dem „#“ – sie werden nie an einen Server geschickt. -->
+<style>
+  :root {
+    --bg: #eef2f7; --card: #ffffff; --ink: #0f1b2d; --muted: #5b6b80; --line: #d6dee8;
+    --blue: #6cc4f5; --red: #b00e26; --purple: #8b5cf6; --green: #16a34a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  }
+  :root[data-theme="dark"] { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 640px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .logo { width: 48px; height: 48px; border-radius: 12px; background: #ffc400; display: grid; place-items: center; font-size: 26px; }
+  h1 { font-size: 22px; margin: 0; }
+  .sub { color: var(--muted); margin: 2px 0 0; font-size: 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  label { display: block; font-weight: 700; margin: 12px 0 6px; }
+  input, select, textarea { width: 100%; font: inherit; color: var(--ink); background: var(--card); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; }
+  .row > * { flex: 1 1 200px; }
+  button, .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 10px 16px; border-radius: 14px;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; text-decoration: none; }
+  .main-btn { background: var(--blue); color: var(--red); border-color: var(--blue); width: 100%; font-size: 17px; }
+  .btns { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-top: 12px; }
+  .appt { border: 2px solid var(--purple); background: color-mix(in srgb, var(--purple) 8%, var(--card)); border-radius: 16px; padding: 16px; }
+  .appt .kind { font-size: 20px; font-weight: 900; }
+  .appt .date { font-size: 18px; font-weight: 800; }
+  #qr { display: grid; place-items: center; padding: 36px; background: #fff; border-radius: 14px; margin-top: 12px; }
+  #qr img, #qr canvas { width: 220px !important; height: 220px !important; }
+  .link { word-break: break-all; font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .hint { color: var(--muted); font-size: 14px; }
+  .hidden { display: none !important; }
+  ol { padding-left: 20px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+  /* Druck: nur der Zettel für den Kunden */
+  @media print {
+    body { background: #fff; color: #000; }
+    header, #form, .btns, .noprint, footer { display: none !important; }
+    .card { border: 2px dashed #999; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">✅</div>
+    <div>
+      <h1 id="title">Werkstatt-Termin für VigPass</h1>
+      <p class="sub" id="subtitle">Kostenlos QR-Code oder Link erstellen – der Termin landet mit Erinnerung in der App Ihrer Kunden.</p>
+    </div>
+  </header>
+
+  <!-- Ansicht 1: Werkstatt erstellt den Termin -->
+  <section id="maker">
+    <div class="card" id="form">
+      <label for="shop">Name der Werkstatt</label>
+      <input id="shop" maxlength="60" placeholder="z. B. Autohaus Mustermann">
+      <label for="tel">Telefon (optional)</label>
+      <input id="tel" maxlength="24" inputmode="tel" placeholder="z. B. +43 7722 12345">
+      <label style="display:flex;gap:10px;align-items:center;font-weight:800"><input id="counter" type="checkbox" style="width:22px;height:22px"> Theken-QR ohne Datum (einmal drucken – der Kunde trägt Datum und Uhrzeit selbst ein)</label>
+      <label for="kind">Art des Termins</label>
+      <div class="row">
+        <div>
+          <select id="kind">
+            <option value="check">Pickerl / §57a-Überprüfung</option>
+            <option value="service">Service / Inspektion</option>
+            <option value="tyre_w">Reifenwechsel auf Winterreifen</option>
+            <option value="tyre_s">Reifenwechsel auf Sommerreifen</option>
+            <option value="own">Allgemeiner Termin (Text unten eingeben)</option>
+          </select>
+        </div>
+        <div>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label for="date">Datum</label>
+          <input id="date" type="date">
+        </div>
+        <div>
+          <label for="time">Uhrzeit (optional)</label>
+          <input id="time" type="time" step="300">
+        </div>
+      </div>
+      <label for="note">Hinweis für den Kunden (optional)</label>
+      <input id="note" maxlength="80" placeholder="z. B. Ölwechsel · Bitte Serviceheft mitbringen">
+      <p class="hint">Tipp: Name und Telefon merkt sich diese Seite auf diesem Gerät – beim nächsten Kunden nur noch Datum wählen.</p>
+    </div>
+
+    <div class="card" id="out">
+      <div class="appt" id="preview"></div>
+      <div id="qr" aria-label="QR-Code"></div>
+      <p class="hint" style="text-align:center">Mit VigPass scannen: <b>Termine → Werkstatt-QR scannen</b><br>oder mit der normalen Handykamera.</p>
+      <div class="link" id="linkText"></div>
+      <div class="btns">
+        <button id="share" class="hidden">📤 Teilen</button>
+        <a class="btn" id="wa" target="_blank" rel="noopener">💬 WhatsApp</a>
+        <a class="btn" id="sms">📱 SMS</a>
+        <a class="btn" id="mail">✉️ E-Mail</a>
+        <button id="copy">📋 Link kopieren</button>
+        <button id="png">🖼️ QR-Code speichern</button>
+        <button id="print">🖨️ Drucken</button>
+      </div>
+      <p class="hint">So kommt der Termin zum Kunden: <b>an der Theke</b> QR-Code scannen lassen, <b>per WhatsApp, SMS oder E-Mail</b> den Link schicken, oder den <b>Zettel ausdrucken</b>. Im E-Mail immer den Link mitschicken – einen QR-Code am eigenen Handy kann man nicht abfotografieren.</p>
+    </div>
+  </section>
+
+  <!-- Ansicht 2: Kunde öffnet den Link/QR-Code ohne App -->
+  <section id="customer" class="hidden">
+    <div class="card">
+      <div class="appt" id="cAppt"></div>
+      <div class="btns">
+        <a class="btn main-btn" id="openApp">📲 In VigPass übernehmen</a>
+        <button id="ics">📅 In Kalender eintragen</button>
+      </div>
+    </div>
+    <div class="card">
+      <b>Noch kein VigPass?</b>
+      <ol>
+        <li>VigPass im App Store oder Google Play laden (kostenlos).</li>
+        <li>Diesen Link noch einmal antippen – oder in VigPass unter <b>Termine</b> auf <b>Werkstatt-QR scannen</b>.</li>
+      </ol>
+      <p class="hint">VigPass erinnert an Vignette, Pickerl, Reifenwechsel und Service. Alle Daten bleiben auf dem Handy.</p>
+    </div>
+    <p class="noprint" style="text-align:center"><a href="termin" id="ownLink">Selbst einen Werkstatt-Termin erstellen</a></p>
+  </section>
+
+  <div class="card hidden" id="bad"><b>Dieser Link ist leider ungültig.</b><p class="hint">Bitte frage deine Werkstatt nach einem neuen Link.</p></div>
+
+  <footer>© 2026 Kreshnik Berisha · VigPass · <a href="https://vigpass.at">vigpass.at</a> · Die Termindaten stehen nur im Link und werden nicht gespeichert.</footer>
+</main>
+
+<script src="qrcode.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var KINDS = {
+    check: 'Pickerl / §57a-Überprüfung', service: 'Service / Inspektion',
+    tyre_w: 'Reifenwechsel auf Winterreifen', tyre_s: 'Reifenwechsel auf Sommerreifen', own: 'Allgemeiner Termin'
+  };
+  var BASE = 'https://vigpass.at/termin';
+  var $ = function (id) { return document.getElementById(id); };
+
+  function clean(s, max) { return String(s || '').replace(/[\u0000-\u001f<>]/g, '').trim().slice(0, max); }
+  function cleanTel(s) { return String(s || '').replace(/[^0-9+ /()-]/g, '').trim().slice(0, 24); }
+  // d = „2027-10-28“ oder mit Uhrzeit „2027-10-28T08:30“
+  function validDate(d) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?$/.exec(d || '');
+    if (!m) return null;
+    var x = new Date(+m[1], +m[2] - 1, +m[3], m[4] ? +m[4] : 9, m[5] ? +m[5] : 0);
+    if (m[4] && (+m[4] > 23 || +m[5] > 59)) return null;
+    x.hasTime = !!m[4];
+    return x.getMonth() === +m[2] - 1 && x.getDate() === +m[3] ? x : null;
+  }
+  function p2(n) { return String(n).padStart(2, '0'); }
+  function fmt(x) { return p2(x.getDate()) + '.' + p2(x.getMonth() + 1) + '.' + x.getFullYear() + (x.hasTime ? ', ' + p2(x.getHours()) + ':' + p2(x.getMinutes()) + ' Uhr' : ''); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k) || ''; localStorage.setItem(k, v); } catch (e) { return ''; } }
+
+  function build(a) {
+    var q = [['v', '1'], ['k', a.k]];
+    if (a.d) q.push(['d', a.d]);
+    if (a.n) q.push(['n', a.n]);
+    if (a.p) q.push(['p', a.p]);
+    if (a.x) q.push(['x', a.x]);
+    return q.map(function (e) { return e[0] + '=' + encodeURIComponent(e[1]); }).join('&');
+  }
+  function parse(hash) {
+    var q = {};
+    hash.replace(/^#/, '').split('&').forEach(function (part) {
+      var i = part.indexOf('=');
+      if (i > 0) { try { q[part.slice(0, i)] = decodeURIComponent(part.slice(i + 1).replace(/\+/g, ' ')); } catch (e) {} }
+    });
+    if (q.v !== '1' || !KINDS[q.k] || (q.d && !validDate(q.d))) return null;
+    return { k: q.k, d: q.d || '', n: clean(q.n, 60), p: cleanTel(q.p), x: clean(q.x, 80) };
+  }
+  // Termin-Karte sicher aufbauen (nur textContent, nie HTML aus dem Link)
+  function fill(el, a) {
+    el.textContent = '';
+    function line(cls, txt) { var d = document.createElement('div'); if (cls) d.className = cls; d.textContent = txt; el.appendChild(d); }
+    line('kind', a.k === 'own' && a.x ? a.x : KINDS[a.k]);
+    line('date', a.d ? '📅 ' + fmt(validDate(a.d)) : '📅 Datum trägt der Kunde in VigPass ein');
+    if (a.n) line('', '🔧 ' + a.n);
+    if (a.p) line('', '☎ ' + a.p);
+    if (a.x && a.k !== 'own') line('', a.x);
+  }
+
+  // ---------- Kunde öffnet den Link ----------
+  if (location.hash.length > 1) {
+    $('maker').classList.add('hidden');
+    var a = parse(location.hash);
+    if (!a) { $('bad').classList.remove('hidden'); return; }
+    $('title').textContent = 'Ihr Termin';
+    $('subtitle').textContent = a.n ? 'von ' + a.n : 'von Ihrer Werkstatt';
+    $('customer').classList.remove('hidden');
+    fill($('cAppt'), a);
+    // Android: „intent://“ öffnet VigPass sicher (auch aus Kamera-Scanner und Browser); ohne App → zurück auf diese Seite.
+    // iPhone: eigenes Schema vigpass://. Die Daten stehen hier nach „?“, weil „#“ bei intent:// belegt ist – die App liest beides.
+    var android = /Android/i.test(navigator.userAgent);
+    $('openApp').href = android
+      ? 'intent://termin?' + build(a) + '#Intent;scheme=vigpass;package=at.vigpass.vigpass;S.browser_fallback_url=' + encodeURIComponent('https://vigpass.at/#app') + ';end'
+      : 'vigpass://termin?' + build(a);
+    if (!a.d) $('ics').classList.add('hidden');
+    $('ics').onclick = function () {
+      var title = (a.k === 'own' && a.x ? a.x : KINDS[a.k]) + (a.n ? ' – ' + a.n : '');
+      var s0 = validDate(a.d), d = s0.getFullYear() + p2(s0.getMonth() + 1) + p2(s0.getDate());
+      var next = new Date(s0); next.setDate(next.getDate() + 1);
+      var d2 = next.getFullYear() + p2(next.getMonth() + 1) + p2(next.getDate());
+      var t1 = d + 'T' + p2(s0.getHours()) + p2(s0.getMinutes()) + '00', e = new Date(s0.getTime() + 3600000);
+      var t2 = e.getFullYear() + p2(e.getMonth() + 1) + p2(e.getDate()) + 'T' + p2(e.getHours()) + p2(e.getMinutes()) + '00';
+      var esc = function (s) { return s.replace(/[\\;,]/g, '\\$&'); };
+      var ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//VigPass//Termin//DE', 'BEGIN:VEVENT',
+        'UID:' + d + '-' + Math.random().toString(36).slice(2) + '@vigpass.at', 'DTSTAMP:' + new Date().toISOString().replace(/[-:]/g, '').slice(0, 15) + 'Z',
+        s0.hasTime ? 'DTSTART:' + t1 : 'DTSTART;VALUE=DATE:' + d, s0.hasTime ? 'DTEND:' + t2 : 'DTEND;VALUE=DATE:' + d2, 'SUMMARY:' + esc(title),
+        'DESCRIPTION:' + esc([a.p ? 'Telefon: ' + a.p : '', a.k !== 'own' ? a.x : ''].filter(Boolean).join(' · ')),
+        'BEGIN:VALARM', 'TRIGGER:-P7D', 'ACTION:DISPLAY', 'DESCRIPTION:' + esc(title), 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([ics], { type: 'text/calendar' }));
+      link.download = 'Termin-' + d + '.ics';
+      link.click();
+    };
+    return;
+  }
+
+  // ---------- Werkstatt erstellt den Termin ----------
+  $('shop').value = store('vp_shop');
+  $('tel').value = store('vp_tel');
+  // Vorbelegung über die Adresse, z. B. termin.html?theke=1&n=Autohaus%20Muster&p=0664%20123&k=service
+  var qs = new URLSearchParams(location.search);
+  if (qs.get('n')) $('shop').value = clean(qs.get('n'), 60);
+  if (qs.get('p')) $('tel').value = cleanTel(qs.get('p'));
+  if (KINDS[qs.get('k')]) $('kind').value = qs.get('k');
+  if (qs.get('theke') === '1') $('counter').checked = true;
+  var in6 = new Date(); in6.setMonth(in6.getMonth() + 12);
+  $('date').value = in6.toISOString().slice(0, 10);
+  var qr = null;
+
+  function update() {
+    var counter = $('counter').checked;
+    $('date').disabled = $('time').disabled = counter;
+    var a = { k: $('kind').value, d: counter ? '' : $('date').value + ($('time').value ? 'T' + $('time').value.slice(0, 5) : ''), n: clean($('shop').value, 60), p: cleanTel($('tel').value), x: clean($('note').value, 80) };
+    store('vp_shop', $('shop').value); store('vp_tel', $('tel').value);
+    if (!counter && !validDate(a.d)) { $('out').classList.add('hidden'); return; }
+    $('out').classList.remove('hidden');
+    var url = BASE + '#' + build(a);
+    fill($('preview'), a);
+    $('linkText').textContent = url;
+    var msg = 'Ihr nächster Termin' + (a.n ? ' bei ' + a.n : '') + ': ' + KINDS[a.k] + (a.d ? ' am ' + fmt(validDate(a.d)) : '') + '. Mit VigPass mit Erinnerung speichern: ' + url;
+    $('wa').href = 'https://wa.me/?text=' + encodeURIComponent(msg);
+    $('sms').href = 'sms:?&body=' + encodeURIComponent(msg);
+    $('mail').href = 'mailto:?subject=' + encodeURIComponent('Ihr Termin' + (a.n ? ' bei ' + a.n : '')) + '&body=' + encodeURIComponent(
+      'Guten Tag,\n\nIhr nächster Termin' + (a.n ? ' bei ' + a.n : '') + ': ' + KINDS[a.k] + (a.d ? ' am ' + fmt(validDate(a.d)) : '') + '.' +
+      (a.x ? '\n' + a.x : '') + '\n\nMit der App VigPass speichern Sie den Termin mit Erinnerung – einfach am Handy diesen Link antippen:\n' + url +
+      (a.p ? '\n\nBei Fragen: ' + a.p : '') + '\n\nFreundliche Grüße' + (a.n ? '\n' + a.n : ''));
+    // Teilen-Menü des Handys (WhatsApp, Signal, Viber, E-Mail …), wo vorhanden
+    if (navigator.share) {
+      $('share').classList.remove('hidden');
+      $('share').onclick = function () { navigator.share({ title: 'Ihr Termin', text: msg }).catch(function () {}); };
+    }
+    $('copy').onclick = function () {
+      (navigator.clipboard ? navigator.clipboard.writeText(url) : Promise.reject()).then(function () { $('copy').textContent = '✓ Kopiert'; setTimeout(function () { $('copy').textContent = '📋 Link kopieren'; }, 1500); }, function () { prompt('Link kopieren:', url); });
+    };
+    $('qr').textContent = '';
+    if (window.QRCode) { qr = new QRCode($('qr'), { text: url, width: 440, height: 440, correctLevel: QRCode.CorrectLevel.M }); }
+    else { $('qr').textContent = 'QR-Code konnte nicht geladen werden – bitte den Link verwenden.'; }
+  }
+  ['counter', 'shop', 'tel', 'kind', 'date', 'time', 'note'].forEach(function (id) { $(id).addEventListener('input', update); $(id).addEventListener('change', update); });
+  $('print').onclick = function () { window.print(); };
+  // QR-Code als Bild (mit weißem Rand, damit Kameras ihn sicher erkennen) – für E-Mail-Anhang, Plakat oder Website der Werkstatt
+  $('png').onclick = function () {
+    var src = $('qr').querySelector('canvas');
+    if (!src) return;
+    var pad = 60, c = document.createElement('canvas');
+    c.width = src.width + 2 * pad; c.height = src.height + 2 * pad;
+    var g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(src, pad, pad);
+    var l = document.createElement('a');
+    l.href = c.toDataURL('image/png');
+    l.download = 'VigPass-Termin-QR.png';
+    l.click();
+  };
+  update();
+})();
+</script>
+</body>
+</html>

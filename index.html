@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VigPass Vignettenpass</title>
+<meta name="description" content="VigPass prüft den Vignetten-Beleg, erinnert rechtzeitig an Vignette, Pickerl, Reifenwechsel und Termine und führt das Tankbuch – alles bleibt auf dem Handy.">
+<!-- Copyright © 2026 Kreshnik Berisha · VigPass. Alle Rechte vorbehalten. -->
+<style>
+  :root { --bg: #eef2f7; --card: #ffffff; --ink: #0f1b2d; --muted: #5b6b80; --line: #d6dee8; --blue: #6cc4f5; --red: #b00e26; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  }
+  :root[data-theme="dark"] { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 40px; }
+  header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+  .logo { width: 56px; height: 56px; border-radius: 14px; background: #ffc400; display: grid; place-items: center; font-size: 30px; flex: none; }
+  h1 { font-size: 26px; margin: 0; }
+  h2 { font-size: 19px; margin: 0 0 8px; }
+  .sub { color: var(--muted); margin: 2px 0 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  ul { padding-left: 20px; margin: 6px 0; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 50px; padding: 10px 18px; border-radius: 14px; background: var(--blue); color: var(--red);
+    font-weight: 800; text-decoration: none; }
+  details { border-top: 1px solid var(--line); padding: 10px 0; }
+  summary { font-weight: 800; cursor: pointer; }
+  .legal { white-space: pre-line; color: var(--muted); font-size: 14px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">✅</div>
+    <div>
+      <h1>VigPass</h1>
+      <p class="sub">Vignettenpass – Vignette prüfen, rechtzeitig erinnert werden</p>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>Was VigPass kann</h2>
+    <ul>
+      <li>Vignetten-Beleg fotografieren: Grün = Kennzeichen passt, Rot = sofort zur Kassa.</li>
+      <li>Erinnerung vor Ablauf von Vignette, Streckenmaut, Pickerl und Reifenwechsel.</li>
+      <li>Termine von Werkstatt, Arzt oder Schule mit Erinnerung.</li>
+      <li>Tankbuch mit Export für Excel, Kundenkarten, Reise planen.</li>
+      <li>Ohne Konto, ohne Server – alle Daten bleiben auf deinem Handy. 34 Sprachen.</li>
+    </ul>
+  </div>
+
+  <div class="card" id="app">
+    <h2>App laden</h2>
+    <p>VigPass kommt in Kürze in den App Store und zu Google Play. Hast du einen Termin-Link bekommen? Nach dem Installieren den Link einfach noch einmal antippen.</p>
+  </div>
+
+  <div class="card">
+    <h2>Für Werkstätten</h2>
+    <p>Kostenlos einen QR-Code oder Link für den nächsten Termin Ihrer Kunden erstellen – per WhatsApp, SMS, E-Mail, Ausdruck oder als Theken-QR.</p>
+    <a class="btn" href="termin">Werkstatt-Termin erstellen</a>
+  </div>
+
+  <div class="card">
+    <details id="impressum">
+      <summary>Impressum</summary>
+      <p class="legal">Kreshnik Berisha
+OMV Tankstelle Altheim
+St. Ulrich 6, 4950 Altheim, Österreich
+
+Telefon: +43 676 3846559
+E-Mail: vigpass.app@outlook.com
+Web: www.vigpass.at
+
+Einzelunternehmer
+UID-Nummer: ATU80946014
+GISA-Zahl: 37431495
+Gewerbebehörde: Bezirkshauptmannschaft Braunau am Inn
+Mitglied der Wirtschaftskammer Oberösterreich
+Anwendbare Rechtsvorschriften: Gewerbeordnung, abrufbar unter www.ris.bka.gv.at
+
+Offenlegung gemäß § 25 Mediengesetz
+Medieninhaber und Herausgeber: Kreshnik Berisha, St. Ulrich 6, 4950 Altheim
+Grundlegende Richtung: Information und Erinnerung zur Gültigkeit digitaler Vignetten, Streckenmaut-Tickets und Terminen.
+
+VigPass ist eine private Hilfs-App und steht in keiner Verbindung zur ASFINAG oder zu anderen Mautbetreibern. Maßgeblich ist immer die Bestätigung des Mautbetreibers.</p>
+    </details>
+    <details id="datenschutz">
+      <summary>Datenschutzerklärung</summary>
+      <p class="legal">Verantwortlicher: Kreshnik Berisha, St. Ulrich 6, 4950 Altheim, Österreich, vigpass.app@outlook.com
+
+A) Diese Webseite
+Die Webseite wird bei GitHub Pages (GitHub Inc., USA) bereitgestellt. Beim Aufruf verarbeitet GitHub technisch notwendige Daten wie die IP-Adresse, um die Seite auszuliefern und vor Missbrauch zu schützen. Es gibt keine Cookies, keine Werbung und keine Analyse- oder Tracking-Dienste. Auf der Seite „Werkstatt-Termin“ stehen die Termindaten nur im Link nach dem „#“ – dieser Teil wird nie an einen Server geschickt. Name und Telefon der Werkstatt merkt sich die Seite nur im Browser des verwendeten Geräts.
+
+B) Die App VigPass
+1. Grundsatz
+VigPass funktioniert ohne Benutzerkonto, ohne Anmeldung und ohne eigenen Server. Wir erhalten keine personenbezogenen Daten von dir. Es gibt keine Werbung und keine Analyse- oder Tracking-Dienste.
+
+2. Was auf deinem Gerät gespeichert wird
+Ausschließlich lokal auf deinem Gerät: Kennzeichen, Fahrzeugname und Fahrzeugart; Vignetten- und Streckenmaut-Daten (Art, Gültigkeit, Fahrten, Produkt-ID); Fotos deiner Belege; Termine (z. B. Kfz-Prüfung, Reifenwechsel, Arzt); Tankbuch-Einträge (Liter, Betrag, Sorte, Tankstelle, Datum, Foto des Tankbelegs); deine Einstellungen (Sprache, Darstellung, Reihenfolge der Reiter).
+
+3. Kamera und Fotos
+Nur wenn du einen Beleg fotografierst oder ein Foto auswählst, greift die App auf Kamera bzw. Fotos zu. Die Fotos bleiben auf deinem Gerät.
+
+4. Texterkennung
+Belegfotos werden mit der Texterkennung „ML Kit“ von Google ausgewertet. Die Erkennung läuft vollständig auf deinem Gerät; Fotos und erkannte Texte werden nicht übertragen. ML Kit kann nach Angaben von Google anonyme technische Nutzungsdaten (z. B. Gerätetyp, Leistungswerte der Erkennung) an Google senden. Weitere Informationen: developers.google.com/ml-kit/terms.
+
+5. Erinnerungen
+Erinnerungen werden lokal auf deinem Gerät geplant. Es gibt keinen Push-Server.
+
+6. Kalender (optional)
+Nur wenn du es auswählst, wird ein Termin in deinem eigenen Kalender angelegt.
+
+7. Widget
+Wenn du das Widget auf deinen Startbildschirm legst, zeigt es Kennzeichen und Gültigkeit deiner Vignette an. Die Daten bleiben auf dem Gerät.
+
+8. Käufe
+Der Kauf von „Pro“ wird ausschließlich von Apple (App Store) bzw. Google (Google Play) abgewickelt. Wir erhalten keine Zahlungsdaten. Die App prüft lediglich bei Apple bzw. Google, ob ein Kauf vorliegt.
+
+9. Schutz der Gratis-Testzeit
+Damit die 10-tägige Gratis-Testzeit nicht durch Neuinstallation wiederholt werden kann, speichert die App das Datum des ersten Starts zusätzlich geschützt auf deinem Gerät: auf Android über den Google-Dienst „Block Store“, auf iPhone/iPad im Schlüsselbund von Apple. Gespeichert wird nur dieses Datum, keine anderen Daten. Je nach Geräteeinstellung kann es Teil der Sicherung deines Google- bzw. Apple-Kontos sein.
+
+10. Teilen und Bewertung
+Nur wenn du „Teilen“ wählst, erstellt die App ein Bild (Kennzeichen nur, wenn du es auswählst) und übergibt es an die von dir gewählte App. Um eine Bewertung bittet die App über das offizielle Fenster von Apple bzw. Google; wir erhalten dabei keine Daten.
+
+11. Sicherung
+Die automatische Datensicherung deines Geräts (iCloud bzw. Google) kann App-Daten einschließen; dafür gelten die Bedingungen von Apple bzw. Google.
+
+12. Löschen
+Fahrzeuge, Vignetten, Termine und Tankbuch-Einträge kannst du in der App einzeln löschen; beim Löschen eines Fahrzeugs werden alle zugehörigen Daten mitgelöscht. Durch Deinstallieren der App werden alle Daten auf dem Gerät entfernt (ausgenommen das Datum aus Punkt 9).
+
+13. Deine Rechte
+Du hast das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung, Datenübertragbarkeit und Widerspruch. Da wir keine Daten von dir erhalten, liegen diese Daten nur auf deinem Gerät. Du kannst dich jederzeit an vigpass.app@outlook.com wenden und hast das Recht auf Beschwerde bei der Österreichischen Datenschutzbehörde (www.dsb.gv.at).</p>
+    </details>
+  </div>
+
+  <footer>© 2026 Kreshnik Berisha · VigPass · <a href="#impressum" onclick="document.getElementById('impressum').open=true">Impressum</a> · <a href="#datenschutz" onclick="document.getElementById('datenschutz').open=true">Datenschutz</a></footer>
+</main>
+<script>
+  // Direktlink #impressum / #datenschutz öffnet den Abschnitt
+  var d = location.hash && document.getElementById(location.hash.slice(1));
+  if (d && d.tagName === 'DETAILS') d.open = true;
+</script>
+</body>
+</html>
