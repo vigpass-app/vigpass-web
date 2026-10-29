@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>VigPass Werkstatt-Termin</title>
+<title>VigPass Termin-QR</title>
 <meta name="description" content="Werkstätten erstellen hier kostenlos einen QR-Code oder Link für den nächsten Termin ihrer Kunden – der Termin landet mit Erinnerung in der App VigPass.">
 <!-- Copyright © 2026 Kreshnik Berisha · VigPass. Alle Rechte vorbehalten.
      Datenschutz: Die Termindaten stehen nur im Link nach dem „#“ – sie werden nie an einen Server geschickt. -->
@@ -55,29 +55,30 @@
   <header>
     <div class="logo" aria-hidden="true">✅</div>
     <div>
-      <h1 id="title">Werkstatt-Termin für VigPass</h1>
-      <p class="sub" id="subtitle">Kostenlos QR-Code oder Link erstellen – der Termin landet mit Erinnerung in der App Ihrer Kunden.</p>
+      <h1 id="title">Termin-QR für VigPass</h1>
+      <p class="sub" id="subtitle">Für Werkstätten, Arztpraxen, Friseure und alle mit Terminen: kostenlos QR-Code oder Link erstellen – der Termin landet mit Erinnerung in der App Ihrer Kunden.</p>
     </div>
   </header>
 
-  <!-- Ansicht 1: Werkstatt erstellt den Termin -->
+  <!-- Ansicht 1: Werkstatt, Praxis, Salon … erstellt den Termin -->
   <section id="maker">
     <div class="card" id="form">
-      <label for="shop">Name der Werkstatt</label>
-      <input id="shop" maxlength="60" placeholder="z. B. Autohaus Mustermann">
+      <label for="branch">Branche</label>
+      <select id="branch">
+        <option value="ws">🚗 Werkstatt / Autohaus</option>
+        <option value="med">🩺 Arzt- und Therapiepraxis</option>
+        <option value="hair">💇 Friseur / Kosmetik</option>
+        <option value="other">📅 Andere (Amt, Schule, Handwerker …)</option>
+      </select>
+      <label for="shop">Name (Werkstatt, Praxis, Salon …)</label>
+      <input id="shop" maxlength="60" placeholder="z. B. Autohaus Mustermann, Ordination Dr. Huber">
       <label for="tel">Telefon (optional)</label>
       <input id="tel" maxlength="24" inputmode="tel" placeholder="z. B. +43 7722 12345">
       <label style="display:flex;gap:10px;align-items:center;font-weight:800"><input id="counter" type="checkbox" style="width:22px;height:22px"> Theken-QR ohne Datum (einmal drucken – der Kunde trägt Datum und Uhrzeit selbst ein)</label>
       <label for="kind">Art des Termins</label>
       <div class="row">
         <div>
-          <select id="kind">
-            <option value="check">Pickerl / §57a-Überprüfung</option>
-            <option value="service">Service / Inspektion</option>
-            <option value="tyre_w">Reifenwechsel auf Winterreifen</option>
-            <option value="tyre_s">Reifenwechsel auf Sommerreifen</option>
-            <option value="own">Allgemeiner Termin (Text unten eingeben)</option>
-          </select>
+          <select id="kind"></select>
         </div>
         <div>
         </div>
@@ -100,7 +101,7 @@
     <div class="card" id="out">
       <div class="appt" id="preview"></div>
       <div id="qr" aria-label="QR-Code"></div>
-      <p class="hint" style="text-align:center">Mit VigPass scannen: <b>Termine → Werkstatt-QR scannen</b><br>oder mit der normalen Handykamera.</p>
+      <p class="hint" style="text-align:center">Mit der normalen <b>Handykamera</b> scannen<br>oder in VigPass: <b>Termine → QR-Code scannen</b>.</p>
       <div class="link" id="linkText"></div>
       <div class="btns">
         <button id="share" class="hidden">📤 Teilen</button>
@@ -128,14 +129,14 @@
       <b>Noch kein VigPass?</b>
       <ol>
         <li>VigPass im App Store oder Google Play laden (kostenlos).</li>
-        <li>Diesen Link noch einmal antippen – oder in VigPass unter <b>Termine</b> auf <b>Werkstatt-QR scannen</b>.</li>
+        <li>Diesen Link noch einmal antippen – oder in VigPass unter <b>Termine</b> auf <b>QR-Code scannen</b>.</li>
       </ol>
       <p class="hint">VigPass erinnert an Vignette, Pickerl, Reifenwechsel und Service. Alle Daten bleiben auf dem Handy.</p>
     </div>
-    <p class="noprint" style="text-align:center"><a href="termin" id="ownLink">Selbst einen Werkstatt-Termin erstellen</a></p>
+    <p class="noprint" style="text-align:center"><a href="termin" id="ownLink">Selbst einen Termin-QR erstellen (für Werkstätten, Praxen, Salons …)</a></p>
   </section>
 
-  <div class="card hidden" id="bad"><b>Dieser Link ist leider ungültig.</b><p class="hint">Bitte frage deine Werkstatt nach einem neuen Link.</p></div>
+  <div class="card hidden" id="bad"><b>Dieser Link ist leider ungültig.</b><p class="hint">Bitte frage nach einem neuen Link.</p></div>
 
   <footer>© 2026 Kreshnik Berisha · VigPass · <a href="https://vigpass.at">vigpass.at</a> · Die Termindaten stehen nur im Link und werden nicht gespeichert.</footer>
 </main>
@@ -144,10 +145,18 @@
 <script>
 (function () {
   'use strict';
-  var KINDS = {
-    check: 'Pickerl / §57a-Überprüfung', service: 'Service / Inspektion',
-    tyre_w: 'Reifenwechsel auf Winterreifen', tyre_s: 'Reifenwechsel auf Sommerreifen', own: 'Allgemeiner Termin'
+  // Arten je Branche – Werkstatt wie bisher, alles andere als persönlicher Termin „p.<Art>“ (wie in der App)
+  var BRANCH = {
+    ws: [['check', 'Pickerl / §57a-Überprüfung'], ['service', 'Service / Inspektion'], ['tyre_w', 'Reifenwechsel auf Winterreifen'], ['tyre_s', 'Reifenwechsel auf Sommerreifen'], ['own', 'Allgemeiner Termin (Text unten eingeben)']],
+    med: [['p.gp', 'Hausarzt'], ['p.spec', 'Facharzt'], ['p.dentist', 'Zahnarzt'], ['p.eye', 'Augenarzt'], ['p.gyn', 'Frauenarzt'], ['p.kidsdoc', 'Kinderarzt'],
+      ['p.physio', 'Physiotherapie'], ['p.vacc', 'Impfung'], ['p.checkup', 'Vorsorgeuntersuchung'], ['p.lab', 'Blutabnahme'], ['p.rx', 'Rezept abholen'], ['p.vet', 'Tierarzt']],
+    hair: [['p.hair', 'Friseur / Kosmetik']],
+    other: [['p.office', 'Amt / Behörde'], ['p.id', 'Pass / Ausweis'], ['p.bank', 'Bank'], ['p.insur', 'Versicherung'], ['p.lawyer', 'Anwalt / Notar'], ['p.tax', 'Steuer / Finanzamt'],
+      ['p.school', 'Schule / Elternsprechtag'], ['p.kiga', 'Kindergarten'], ['p.course', 'Kurs / Nachhilfe'], ['p.sport', 'Sport / Training'], ['p.craft', 'Handwerker / Reparatur'], ['p.parcel', 'Paket / Abholung'], ['p.own', 'Allgemeiner Termin (Text unten eingeben)']]
   };
+  var KINDS = {};
+  Object.keys(BRANCH).forEach(function (b) { BRANCH[b].forEach(function (e) { KINDS[e[0]] = e[1].replace(' (Text unten eingeben)', ''); }); });
+  function branchOf(k) { return Object.keys(BRANCH).filter(function (b) { return BRANCH[b].some(function (e) { return e[0] === k; }); })[0] || 'ws'; }
   var BASE = 'https://vigpass.at/termin';
   var $ = function (id) { return document.getElementById(id); };
 
@@ -187,11 +196,11 @@
   function fill(el, a) {
     el.textContent = '';
     function line(cls, txt) { var d = document.createElement('div'); if (cls) d.className = cls; d.textContent = txt; el.appendChild(d); }
-    line('kind', a.k === 'own' && a.x ? a.x : KINDS[a.k]);
+    line('kind', (a.k === 'own' || a.k === 'p.own') && a.x ? a.x : KINDS[a.k]);
     line('date', a.d ? '📅 ' + fmt(validDate(a.d)) : '📅 Datum trägt der Kunde in VigPass ein');
-    if (a.n) line('', '🔧 ' + a.n);
+    if (a.n) line('', (a.k.indexOf('p.') === 0 ? '📍 ' : '🔧 ') + a.n);
     if (a.p) line('', '☎ ' + a.p);
-    if (a.x && a.k !== 'own') line('', a.x);
+    if (a.x && a.k !== 'own' && a.k !== 'p.own') line('', a.x);
   }
 
   // ---------- Kunde öffnet den Link ----------
@@ -200,7 +209,7 @@
     var a = parse(location.hash);
     if (!a) { $('bad').classList.remove('hidden'); return; }
     $('title').textContent = 'Ihr Termin';
-    $('subtitle').textContent = a.n ? 'von ' + a.n : 'von Ihrer Werkstatt';
+    $('subtitle').textContent = a.n ? 'von ' + a.n : 'Ihr Termin mit Erinnerung in VigPass';
     $('customer').classList.remove('hidden');
     fill($('cAppt'), a);
     // Android: „intent://“ öffnet VigPass sicher (auch aus Kamera-Scanner und Browser); ohne App → zurück auf diese Seite.
@@ -231,24 +240,35 @@
     return;
   }
 
-  // ---------- Werkstatt erstellt den Termin ----------
+  // ---------- Werkstatt, Praxis, Salon … erstellt den Termin ----------
   $('shop').value = store('vp_shop');
   $('tel').value = store('vp_tel');
   // Vorbelegung über die Adresse, z. B. termin.html?theke=1&n=Autohaus%20Muster&p=0664%20123&k=service
   var qs = new URLSearchParams(location.search);
   if (qs.get('n')) $('shop').value = clean(qs.get('n'), 60);
   if (qs.get('p')) $('tel').value = cleanTel(qs.get('p'));
-  if (KINDS[qs.get('k')]) $('kind').value = qs.get('k');
+  // Branche wählen → passende Arten; gemerkt auf diesem Gerät, oder per Adresse ?b=med / ?k=p.dentist
+  function fillKinds(keep) {
+    var sel = $('kind'), b = $('branch').value;
+    sel.textContent = '';
+    BRANCH[b].forEach(function (e) { var o = document.createElement('option'); o.value = e[0]; o.textContent = e[1]; sel.appendChild(o); });
+    if (keep && KINDS[keep] && branchOf(keep) === b) sel.value = keep;
+    // Werkstatt: nächster Termin meist in einem Jahr, sonst in einer Woche
+    var d = new Date(); if (b === 'ws') d.setMonth(d.getMonth() + 12); else d.setDate(d.getDate() + 7);
+    $('date').value = d.toISOString().slice(0, 10);
+  }
+  var k0 = KINDS[qs.get('k')] ? qs.get('k') : store('vp_kind');
+  $('branch').value = BRANCH[qs.get('b')] ? qs.get('b') : KINDS[k0] ? branchOf(k0) : (store('vp_branch') || 'ws');
+  fillKinds(k0);
+  $('branch').addEventListener('change', function () { store('vp_branch', $('branch').value); fillKinds(); update(); });
   if (qs.get('theke') === '1') $('counter').checked = true;
-  var in6 = new Date(); in6.setMonth(in6.getMonth() + 12);
-  $('date').value = in6.toISOString().slice(0, 10);
   var qr = null;
 
   function update() {
     var counter = $('counter').checked;
     $('date').disabled = $('time').disabled = counter;
     var a = { k: $('kind').value, d: counter ? '' : $('date').value + ($('time').value ? 'T' + $('time').value.slice(0, 5) : ''), n: clean($('shop').value, 60), p: cleanTel($('tel').value), x: clean($('note').value, 80) };
-    store('vp_shop', $('shop').value); store('vp_tel', $('tel').value);
+    store('vp_shop', $('shop').value); store('vp_tel', $('tel').value); store('vp_kind', a.k);
     if (!counter && !validDate(a.d)) { $('out').classList.add('hidden'); return; }
     $('out').classList.remove('hidden');
     var url = BASE + '#' + build(a);
