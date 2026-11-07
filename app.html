@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VigPass laden</title>
+<meta name="description" content="VigPass laden – für iPhone im App Store, für Android bei Google Play.">
+<!-- Ziel der QR-Codes auf Aufsteller, Plakat und Kärtchen. Nach dem Store-Start nur die zwei Links unten eintragen,
+     die Drucksachen bleiben gültig. Kein Tracking, keine Cookies. -->
+<style>
+  :root { --bg: #eef2f7; --card: #ffffff; --ink: #0f1b2d; --muted: #5b6b80; --line: #d6dee8; --blue: #6cc4f5; --red: #b00e26; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  }
+  :root[data-theme="dark"] { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 520px; margin: 0 auto; padding: 32px 16px; text-align: center; }
+  .logo { width: 72px; height: 72px; border-radius: 18px; background: #ffc400; display: grid; place-items: center; font-size: 38px; margin: 0 auto 12px; }
+  .btn { display: flex; align-items: center; justify-content: center; min-height: 54px; margin: 12px 0; border-radius: 14px; background: var(--blue); color: var(--red); font-weight: 800; text-decoration: none; }
+  .muted { color: var(--muted); font-size: 15px; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<main>
+  <div class="logo" aria-hidden="true">✅</div>
+  <h1 style="margin:0 0 6px">VigPass</h1>
+  <p id="msg" class="muted">Einen Moment …</p>
+  <div id="links"></div>
+  <p class="muted"><a href="./">Zur Startseite vigpass.at</a></p>
+</main>
+<script>
+  // Nach dem Store-Start hier die echten Links eintragen (leer = noch nicht im Store):
+  var APPLE = '';   // z. B. https://apps.apple.com/at/app/vigpass/id…
+  var GOOGLE = '';  // z. B. https://play.google.com/store/apps/details?id=at.vigpass.vigpass
+  var ua = navigator.userAgent || '';
+  var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var android = /Android/.test(ua);
+  var target = ios ? APPLE : android ? GOOGLE : '';
+  if (target) {
+    location.replace(target);
+  } else if (!APPLE && !GOOGLE) {
+    // noch nicht in den Stores: auf die Startseite mit dem Abschnitt „App laden“
+    location.replace('./#app');
+  } else {
+    // Computer oder unbekanntes Gerät: beide Knöpfe zeigen
+    document.getElementById('msg').textContent = 'VigPass für dein Handy laden:';
+    var h = '';
+    if (APPLE) h += '<a class="btn" href="' + APPLE + '">iPhone · App Store</a>';
+    if (GOOGLE) h += '<a class="btn" href="' + GOOGLE + '">Android · Google Play</a>';
+    document.getElementById('links').innerHTML = h;
+  }
+</script>
+<noscript><p><a href="./#app">Weiter zu vigpass.at</a></p></noscript>
+</body>
+</html>
