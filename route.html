@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VigPass Reise</title>
+<meta name="description" content="Geteilte Reise aus der App VigPass – in VigPass öffnen und sehen, welche Vignetten und Maut man braucht.">
+<meta name="robots" content="noindex">
+<!-- Copyright © 2026 Kreshnik Berisha · VigPass. Alle Rechte vorbehalten.
+     Datenschutz: Die Reisedaten stehen nur im Link nach dem „#“ – sie werden nie an einen Server geschickt. -->
+<style>
+  :root { --bg: #eef2f7; --card: #ffffff; --ink: #0f1b2d; --muted: #5b6b80; --line: #d6dee8; --blue: #6cc4f5; --red: #b00e26; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  }
+  :root[data-theme="dark"] { --bg: #0b1420; --card: #152234; --ink: #eaf1fa; --muted: #9db0c6; --line: #2a3b52; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 560px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .logo { width: 48px; height: 48px; border-radius: 12px; background: #ffc400; display: grid; place-items: center; font-size: 26px; }
+  h1 { font-size: 22px; margin: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; margin-bottom: 14px; }
+  .route { font-size: 22px; font-weight: 900; }
+  .when { color: var(--muted); font-weight: 700; margin-top: 4px; }
+  .btn { display: flex; align-items: center; justify-content: center; min-height: 52px; padding: 10px 16px; border-radius: 14px; margin-top: 10px;
+    border: 1.5px solid var(--line); background: var(--card); color: var(--ink); font-weight: 800; text-decoration: none; }
+  .main-btn { background: var(--blue); color: var(--red); border-color: var(--blue); font-size: 17px; }
+  .hint { color: var(--muted); font-size: 14px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; margin-top: 20px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo" aria-hidden="true">🛣️</div>
+    <h1>Geteilte Reise</h1>
+  </header>
+  <div class="card">
+    <div class="route" id="route">Reise aus VigPass</div>
+    <div class="when" id="when"></div>
+    <a class="btn main-btn" id="open" href="#">In VigPass öffnen</a>
+    <p class="hint">VigPass zeigt dir dann dieselbe Reise: Länder, Vignetten, Maut und Tunnel – und prüft, ob deine eigenen Vignetten reichen.</p>
+  </div>
+  <div class="card">
+    <strong>Noch kein VigPass?</strong>
+    <div id="stores"></div>
+    <p class="hint">10 Tage gratis testen.</p>
+  </div>
+  <footer>VigPass · <a href="https://vigpass.at">vigpass.at</a> · Keine offizielle App der ASFINAG.</footer>
+</main>
+<script>
+  // Store-Links wie in app.html
+  var APPLE = 'https://apps.apple.com/at/app/vigpass-vignettenpass/id6828565282';
+  var GOOGLE = '';
+  var code = location.hash.slice(1);
+  document.getElementById('open').href = 'vigpass://route#' + code;
+  try {
+    var b = code.replace(/-/g, '+').replace(/_/g, '/');
+    while (b.length % 4) b += '=';
+    var j = JSON.parse(decodeURIComponent(escape(atob(b))));
+    var fmt = function (d) { var p = d.split('-'); return p[2] + '.' + p[1] + '.' + p[0]; };
+    document.getElementById('route').textContent = j.f[0] + ' → ' + j.t[0];
+    document.getElementById('when').textContent = (j.c === 'moto' ? '🏍️ ' : '🚗 ') + 'Abfahrt ' + fmt(j.d) + (j.b ? ' · Rückkehr ' + fmt(j.b) : '');
+  } catch (e) { /* ungültiger Link: allgemeiner Text bleibt */ }
+  var h = '';
+  if (APPLE) h += '<a class="btn" href="' + APPLE + '">iPhone · App Store</a>';
+  if (GOOGLE) h += '<a class="btn" href="' + GOOGLE + '">Android · Google Play</a>';
+  if (!GOOGLE) h += '<p class="hint">Android · Google Play folgt in Kürze.</p>';
+  document.getElementById('stores').innerHTML = h;
+</script>
+</body>
+</html>
