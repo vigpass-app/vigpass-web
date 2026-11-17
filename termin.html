@@ -156,6 +156,10 @@
   };
   var KINDS = {};
   Object.keys(BRANCH).forEach(function (b) { BRANCH[b].forEach(function (e) { KINDS[e[0]] = e[1].replace(' (Text unten eingeben)', ''); }); });
+  // Arten, die nur Privatleute aus VigPass weiterleiten (Termin teilen) – nicht im Werkstatt-/Praxis-Formular
+  [['p.bday', 'Geburtstag'], ['p.contract', 'Vertrag / Kündigung'], ['p.exam', 'Schularbeit / Prüfung'], ['p.hosp', 'Krankenhaus'],
+    ['p.party', 'Feier / Fest'], ['p.trip', 'Reise / Flug'], ['p.waste', 'Müllabfuhr / Sperrmüll'], ['p.work', 'Arbeit / Besprechung']]
+    .forEach(function (e) { KINDS[e[0]] = e[1]; });
   function branchOf(k) { return Object.keys(BRANCH).filter(function (b) { return BRANCH[b].some(function (e) { return e[0] === k; }); })[0] || 'ws'; }
   var BASE = 'https://vigpass.at/termin';
   var $ = function (id) { return document.getElementById(id); };
@@ -220,7 +224,7 @@
       : 'vigpass://termin?' + build(a);
     if (!a.d) $('ics').classList.add('hidden');
     $('ics').onclick = function () {
-      var title = (a.k === 'own' && a.x ? a.x : KINDS[a.k]) + (a.n ? ' – ' + a.n : '');
+      var title = ((a.k === 'own' || a.k === 'p.own') && a.x ? a.x : KINDS[a.k]) + (a.n ? ' – ' + a.n : '');
       var s0 = validDate(a.d), d = s0.getFullYear() + p2(s0.getMonth() + 1) + p2(s0.getDate());
       var next = new Date(s0); next.setDate(next.getDate() + 1);
       var d2 = next.getFullYear() + p2(next.getMonth() + 1) + p2(next.getDate());
